@@ -32,8 +32,6 @@ Root Cause:
 Resolution Steps:
 <numbered steps based ONLY on provided resolution>
 
-FACTS:
-{facts}
 """
 
 def response_known_node(state: IncidentState) -> IncidentState:
