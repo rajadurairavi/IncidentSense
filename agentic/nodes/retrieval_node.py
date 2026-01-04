@@ -1,10 +1,14 @@
-from agentic.state import GraphState
+from agentic.state import IncidentState
 from rag.vector_store.pinecone_retrieval import retrieve_from_pinecone
 
-def retrieval_node(state: GraphState) -> GraphState:
+
+def retrieval_node(state: IncidentState) -> IncidentState:
+    """
+    Calls Pinecone retrieval using ONLY incident description.
+    """
+
     result = retrieve_from_pinecone(
-        summary=state["user_summary"],
-        description=state["user_description"]
+        description=state["description"]
     )
 
     state["match_found"] = result["match_found"]

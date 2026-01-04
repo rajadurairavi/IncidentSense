@@ -6,35 +6,38 @@ API_URL = "http://127.0.0.1:8000/analyze"
 st.set_page_config(page_title="IncidentSense", layout="centered")
 
 st.title("🧠 IncidentSense – Helix Incident Analyzer")
+st.markdown("Paste the incident description from Helix and click **Analyze**.")
 
-st.markdown("Paste incident details below and click **Analyze**")
-
-summary = st.text_input("Incident Summary")
-description = st.text_area("Incident Description", height=150)
+description = st.text_area(
+    "Incident Description",
+    height=200,
+    placeholder="Paste full incident details here..."
+)
 
 if st.button("Analyze"):
-    if not summary or not description:
-        st.warning("Please provide both summary and description")
+    if not description.strip():
+        st.warning("Please provide an incident description.")
     else:
         with st.spinner("Analyzing incident..."):
             payload = {
-                "summary": summary,
                 "description": description
             }
 
             response = requests.post(API_URL, json=payload)
 
             if response.status_code != 200:
-                st.error("Error calling backend API")
+                st.error("Error calling backend API.")
             else:
                 result = response.json()
 
-                st.subheader("📋 Incident Details")
-                st.write(result["incident"])
+                if result.get("based_on_history"):
+                    st.subheader("🔍 Root Cause")
+                    st.write(result["answer"].split("Resolution Steps:")[0].replace("Root Cause:", "").strip())
 
-                if result["based_on_history"]:
-                    st.subheader("🔍 Root Cause & Resolution")
-                    st.success(result["answer"])
-                    st.metric("Confidence", result["confidence"])
+                    st.subheader("🛠 Resolution Steps")
+                    resolution = result["answer"].split("Resolution Steps:")[-1].strip()
+                    st.write(resolution)
+
+                    st.metric("Confidence", result.get("confidence"))
                 else:
-                    st.warning(result["message"])
+                    st.warning(result.get("message"))

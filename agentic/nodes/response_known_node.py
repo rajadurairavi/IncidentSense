@@ -1,5 +1,5 @@
 import os
-from agentic.state import GraphState
+from agentic.state import IncidentState
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -8,7 +8,7 @@ llm = ChatGroq(
     model_name="llama-3.1-8b-instant"
 )
 
-SYSTEM_PROMPT = """
+PROMPT = """
 You are an ITSM incident response assistant.
 
 You are given FACTS retrieved from historical incidents.
@@ -18,17 +18,13 @@ STRICT RULES:
 - Use ONLY the provided facts.
 - Do NOT add new root causes.
 - Do NOT add new resolution steps.
-- Do NOT generalize or guess.
+- Do NOT assume or generalize.
 - Do NOT use external knowledge.
-- If something is not present in the facts, do NOT mention it.
 
 If the facts are insufficient, respond exactly with:
 "Insufficient historical data to provide a definitive root cause or resolution."
 
 Format the response EXACTLY as below:
-
-Incident Summary:
-<one concise sentence>
 
 Root Cause:
 <root cause exactly as provided>
@@ -40,34 +36,25 @@ FACTS:
 {facts}
 """
 
-def response_known_node(state: GraphState) -> GraphState:
+def response_known_node(state: IncidentState) -> IncidentState:
     facts = f"""
-FACTS:
-Root Cause:
-{state['root_cause']}
-
-Resolution:
-{state['resolution']}
+Root Cause: {state.get('root_cause')}
+Resolution: {state.get('resolution')}
 """
 
     question = f"""
-Incident:
-Summary: {state['user_summary']}
-Description: {state['user_description']}
+Incident Description:
+{state["description"]}
 """
 
     messages = [
-        SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=f"{question}\n\n{facts}")
+        SystemMessage(content=PROMPT),
+        HumanMessage(content=question + "\n\n" + facts)
     ]
 
     response = llm.invoke(messages)
 
     state["final_response"] = {
-        "incident": {
-            "summary": state["user_summary"],
-            "description": state["user_description"]
-        },
         "based_on_history": True,
         "confidence": state["confidence"],
         "answer": response.content

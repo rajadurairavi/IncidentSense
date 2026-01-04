@@ -1,7 +1,9 @@
-from agentic.state import GraphState
+from agentic.state import IncidentState
 
-def summary_node(state: GraphState) -> GraphState:
-    # For now: no LLM, no token usage
-    combined = f"{state['user_summary']} {state['user_description']}".strip()
-    state["enhanced_summary"] = combined
+
+def summary_node(state: IncidentState) -> IncidentState:
+    """
+    Pass-through node.
+    Reserved for future normalization or enrichment.
+    """
     return state

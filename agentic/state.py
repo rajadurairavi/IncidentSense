@@ -1,18 +1,15 @@
 from typing import TypedDict, Optional
 
-class GraphState(TypedDict):
-    # User input
-    user_summary: str
-    user_description: str
 
-    # Processed
-    enhanced_summary: Optional[str]
+class IncidentState(TypedDict, total=False):
+    # User input (only description now)
+    description: str
 
-    # Retrieval output
-    match_found: Optional[bool]
-    confidence: Optional[float]
+    # Retrieval outputs
+    match_found: bool
+    confidence: float
     root_cause: Optional[str]
     resolution: Optional[str]
 
     # Final response
-    final_response: Optional[dict]
+    final_response: dict

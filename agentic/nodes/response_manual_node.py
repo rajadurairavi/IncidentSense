@@ -1,11 +1,8 @@
-from agentic.state import GraphState
+from agentic.state import IncidentState
 
-def response_manual_node(state: GraphState) -> GraphState:
+
+def response_manual_node(state: IncidentState) -> IncidentState:
     state["final_response"] = {
-        "incident": {
-            "summary": state["user_summary"],
-            "description": state["user_description"]
-        },
         "based_on_history": False,
         "message": "No historical match found — please analyze manually."
     }
